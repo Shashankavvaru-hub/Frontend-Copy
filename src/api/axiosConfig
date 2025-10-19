@@ -1,0 +1,28 @@
+import axios from 'axios';
+
+// Create a new instance of axios
+const api = axios.create({
+  baseURL: 'http://localhost:8080/api', // The base URL for all our API calls
+});
+
+// This is the interceptor. It runs before every request.
+api.interceptors.request.use(
+  (config) => {
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+    console.log("🔑 Attaching token to request:", token);
+    
+    // If the token exists, add it to the request headers
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return config;
+  },
+  (error) => {
+    // Handle request errors
+    return Promise.reject(error);
+  }
+);
+
+export default api;

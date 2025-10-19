@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS below */
+
+/* --- 1. Global Typography and Color Theme --- */
+body {
+  /* Set the default font for all text */
+  font-family: 'Lato', sans-serif;
+  /* A slightly off-white background is easier on the eyes */
+  background-color: #f8f9fa; 
+  
+  /* Set the default text color */
+  color: #212529;
+}
+
+/* --- 2. Heading Styles --- */
+h1, h2, h3, h4, h5, h6 {
+  /* Use our special display font for all headings */
+  font-family: 'Lora', serif;
+  font-weight: 700; /* Make headings bold */
+}
+
+/* --- 3. Custom Component Styles --- */
+
+/* We'll create a custom class for our Navbar */
+.navbar-custom {
+  background-color: #2c3e50; /* A deep, dark blue-slate */
+}
+
+/* Customizing Bootstrap's primary button */
+.btn-primary {
+  background-color: #008080; /* Our deep teal color */
+  border-color: #008080;
+}
+
+.btn-primary:hover {
+  background-color: #006666; /* A slightly darker teal for hover */
+  border-color: #006666;
+}
+
+/* Customizing the success/accent button */
+.btn-success {
+    background-color: #198754; /* Our saffron/orange accent color */
+    border-color: #198754; /* Darker text for better contrast */
+}
+
+.btn-success:hover {
+    background-color: #105233;
+    border-color: #105233;
+}
