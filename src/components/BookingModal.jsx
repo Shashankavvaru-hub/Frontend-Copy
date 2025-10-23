@@ -4,6 +4,7 @@ import { X, AlertTriangle, CheckCircle, Send } from "lucide-react";
 
 // Assuming this exists in your project
 import api from "../api/axiosConfig";
+import { FireworksBackground } from "./ui/fireworks-background";
 
 // A robust helper function to convert a Date object to a 'YYYY-MM-DD' string, ignoring timezones.
 const toYYYYMMDD = (date) => {
@@ -63,7 +64,7 @@ const BookingModal = ({
         setSuccess("");
         setMessage("");
         setEventDate(new Date());
-      }, 2500);
+      }, 5000);
     } catch (err) {
       setError("Failed to send booking request. Please try again.");
       console.error(err);
@@ -121,10 +122,21 @@ const BookingModal = ({
 
   return (
     <div
-      className="fixed inset-0 bg-kalaa-cream bg-opacity-80 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-kalaa-cream/80 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
     >
+      {success && (
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <FireworksBackground
+            className="size-full"
+            population={3}
+            color={["#ff4d4f", "#52c41a", "#1677ff", "#faad14"]}
+            fireworkSpeed={{ min: 4, max: 8 }}
+            particleSize={{ min: 2, max: 6 }}
+          />
+        </div>
+      )}
       <style>{calendarStyles}</style>
       {/* MODAL PANEL: Added flex layout and max-height to contain content */}
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto transform transition-all flex flex-col max-h-[90vh]">

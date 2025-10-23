@@ -1,5 +1,5 @@
 import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Link } from "react-router-dom";
@@ -18,6 +18,14 @@ const ART_FORM_COLORS = {
   CLUSTER: "#6D28D9",
 };
 
+const getCategoryAbbrev = (artForm) => {
+  const s = artForm.toLowerCase();
+  if (s.includes("burrakatha")) return "Bk";
+  if (s.includes("bharathanatyam") || s.includes("dance")) return "Bn";
+  if (s.includes("tholu bommalata") || s.includes("puppetry")) return "Pu";
+  return "Ot";
+};
+
 const getMarkerColor = (artForm) => {
   const lower = artForm.toLowerCase();
   if (lower.includes("burrakatha")) return ART_FORM_COLORS.BURRAKATHA.color;
@@ -28,21 +36,55 @@ const getMarkerColor = (artForm) => {
   return ART_FORM_COLORS.OTHER.color;
 };
 
-const createColoredIcon = (color) => {
-  const markerHtml = `<i class="fa fa-map-marker" style="color: ${color}; font-size: 32px; text-shadow: 0 1px 3px rgba(0,0,0,0.4);"></i>`;
+// Professional circular pin with subtle pointer and shadow
+const createPinIcon = (color, label) => {
+  const markerHtml = `
+    <div class="group relative">
+      <div class="w-7 h-7 rounded-full ring-2 ring-white shadow-md transition-transform duration-150 group-hover:scale-110 flex items-center justify-center text-white text-[10px] font-bold" style="background:${color}">${label}</div>
+      <div class="absolute left-1/2 top-7 -translate-x-1/2 w-2 h-2 bg-white rotate-45 shadow" style="background:${color}; box-shadow: 0 1px 2px rgba(0,0,0,0.25);"></div>
+    </div>
+  `;
   return new L.DivIcon({
     html: markerHtml,
-    className: "custom-fa-icon",
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
+    className: "kalaa-pin-icon",
+    iconSize: [24, 36],
+    iconAnchor: [12, 36],
   });
+};
+
+// Zoom-on-click marker wrapper (for clusters or grouped points)
+const ZoomMarker = ({ position, icon, zoomDelta = 2, children }) => {
+  const map = useMap();
+  return (
+    <Marker
+      position={position}
+      icon={icon}
+      eventHandlers={{
+        click: () => {
+          const current = map.getZoom();
+          map.setView(position, Math.min(current + zoomDelta, map.getMaxZoom?.() || 18));
+        },
+      }}
+    >
+      {children}
+    </Marker>
+  );
 };
 
 const createClusterIcon = (count) => {
   return new L.DivIcon({
-    html: `<div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base border-2 border-white shadow-lg" style="background-color: ${ART_FORM_COLORS.CLUSTER};">${count}</div>`,
-    className: "custom-cluster-icon",
-    iconSize: [40, 40],
+    html: `
+      <div class="relative">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg"
+             style="background: radial-gradient(100% 100% at 50% 0%, #7C3AED 0%, #5B21B6 100%); border:2px solid #fff;">
+          ${count}
+        </div>
+        <div class="absolute left-1/2 top-10 -translate-x-1/2 w-2 h-2 rotate-45" style="background:#5B21B6; box-shadow: 0 1px 2px rgba(0,0,0,0.25);"></div>
+      </div>
+    `,
+    className: "kalaa-cluster-icon",
+    iconSize: [40, 48],
+    iconAnchor: [20, 48],
   });
 };
 
@@ -54,18 +96,34 @@ const MapLegend = () => (
         .filter((item) => item.label)
         .map((item) => (
           <li key={item.label} className="flex items-center">
-            <i
-              className="fa fa-map-marker w-5 text-center mr-2"
-              style={{ color: item.color }}
-            ></i>
+            <span className="relative mr-2 inline-block" style={{ width: 24, height: 24 }}>
+              <span
+                className="w-5 h-5 rounded-full ring-2 ring-white shadow flex items-center justify-center text-[10px] font-bold text-white"
+                style={{ backgroundColor: item.color, display: 'inline-flex' }}
+              >
+                {getCategoryAbbrev(item.label)}
+              </span>
+              <span
+                className="absolute left-1/2 top-5 -translate-x-1/2 w-1.5 h-1.5 rotate-45"
+                style={{ backgroundColor: item.color, boxShadow: '0 1px 2px rgba(0,0,0,0.25)' }}
+              />
+            </span>
             <span>{item.label}</span>
           </li>
         ))}
       <li className="flex items-center">
-        <span
-          style={{ backgroundColor: ART_FORM_COLORS.CLUSTER }}
-          className="w-5 h-5 rounded-full mr-2 border border-gray-300 flex-shrink-0"
-        ></span>
+        <span className="relative mr-2 inline-block" style={{ width: 24, height: 24 }}>
+          <span
+            className="w-5 h-5 rounded-full ring-2 ring-white shadow flex items-center justify-center text-[10px] font-bold text-white"
+            style={{ background: 'radial-gradient(100% 100% at 50% 0%, #7C3AED 0%, #5B21B6 100%)', display: 'inline-flex' }}
+          >
+            Cl
+          </span>
+          <span
+            className="absolute left-1/2 top-5 -translate-x-1/2 w-1.5 h-1.5 rotate-45"
+            style={{ backgroundColor: '#5B21B6', boxShadow: '0 1px 2px rgba(0,0,0,0.25)' }}
+          />
+        </span>
         <span>Multiple Artists</span>
       </li>
     </ul>
@@ -102,12 +160,17 @@ const MapComponent = ({ artists }) => {
           if (group.length === 1) {
             const artist = group[0];
             const color = getMarkerColor(artist.artForm);
+            const abbrev = getCategoryAbbrev(artist.artForm);
             return (
               <Marker
                 key={artist.id}
                 position={position}
-                icon={createColoredIcon(color)}
+                icon={createPinIcon(color, abbrev)}
               >
+                <Tooltip direction="top" offset={[0, -20]} opacity={0.9}>
+                  <div className="text-sm font-semibold">{artist.artistName}</div>
+                  <div className="text-xs text-gray-600">{artist.artForm}</div>
+                </Tooltip>
                 <Popup>
                   <strong className="font-playfair text-lg">
                     {artist.artistName}
@@ -127,11 +190,15 @@ const MapComponent = ({ artists }) => {
           }
 
           return (
-            <Marker
+            <ZoomMarker
               key={`cluster-${index}`}
               position={position}
               icon={createClusterIcon(group.length)}
             >
+              <Tooltip direction="top" opacity={0.9}>
+                <div className="text-sm font-semibold">{group.length} artists here</div>
+                <div className="text-xs text-gray-600">Click to zoom in</div>
+              </Tooltip>
               <Popup>
                 <strong className="font-semibold">
                   {group.length} Artists at this Location
@@ -151,7 +218,7 @@ const MapComponent = ({ artists }) => {
                   ))}
                 </ul>
               </Popup>
-            </Marker>
+            </ZoomMarker>
           );
         })}
       </MapContainer>

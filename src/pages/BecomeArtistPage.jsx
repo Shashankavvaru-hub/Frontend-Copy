@@ -14,6 +14,7 @@ import {
 // Assuming these exist in your project
 import { AuthContext } from "../context/AuthContext";
 import api from "../api/axiosConfig";
+import { FireworksBackground } from "../components/ui/fireworks-background";
 
 const BecomeArtistPage = () => {
   const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ const BecomeArtistPage = () => {
     artForm: "",
     location: "",
     bio: "",
+    shortBio: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -149,6 +151,28 @@ const BecomeArtistPage = () => {
 
               <div>
                 <label
+                  htmlFor="shortBio"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Short Bio (one-liner)
+                </label>
+                <div className="relative">
+                  <Feather className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    id="shortBio"
+                    name="shortBio"
+                    value={formData.shortBio}
+                    onChange={handleInputChange}
+                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-kalaa-orange focus:bg-white transition-all"
+                    placeholder="E.g., Folk singer with 8+ years experience"
+                    maxLength={160}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
                   htmlFor="bio"
                   className="block text-sm font-semibold text-gray-700 mb-2"
                 >
@@ -194,10 +218,19 @@ const BecomeArtistPage = () => {
       {/* Success Modal */}
       {showSuccessModal && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
         >
+          <div className="absolute inset-0 pointer-events-none">
+            <FireworksBackground
+              className="size-full"
+              population={3}
+              color={["#ff4d4f", "#52c41a", "#1677ff", "#faad14"]}
+              fireworkSpeed={{ min: 4, max: 8 }}
+              particleSize={{ min: 2, max: 6 }}
+            />
+          </div>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto transform transition-all text-center p-8">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="font-playfair text-2xl font-bold text-kalaa-charcoal">

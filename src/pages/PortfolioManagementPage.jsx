@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
+import { FireworksBackground } from "../components/ui/fireworks-background";
 import { useDropzone } from "react-dropzone";
 import {
   Briefcase,
@@ -23,9 +24,12 @@ const PortfolioManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [previewMedia, setPreviewMedia] = useState(null);
+  const [celebrate, setCelebrate] = useState(false);
 
   // State for delete confirmation
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const { user, refreshUser } = useContext(AuthContext);
 
@@ -78,6 +82,8 @@ const PortfolioManagementPage = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       showSuccessToast("Files uploaded successfully!");
+      setCelebrate(true);
+      setTimeout(() => setCelebrate(false), 1500);
       setSelectedFiles([]); // Clear selected files
       await fetchPortfolio(); // Refresh portfolio
       if (refreshUser) await refreshUser();
@@ -105,15 +111,21 @@ const PortfolioManagementPage = () => {
 
   const handleDelete = async () => {
     if (!itemToDelete) return;
+    setDeleting(true);
     try {
       await api.delete(`/artists/portfolio/${itemToDelete.id}`);
       showSuccessToast("Media deleted successfully!");
+      setCelebrate(true);
+      setTimeout(() => setCelebrate(false), 1200);
       setItemToDelete(null); // Close modal
       await fetchPortfolio(); // Refresh portfolio
       if (refreshUser) await refreshUser();
     } catch (err) {
-      showErrorToast("Failed to delete media.");
-      console.error(err);
+      const msg = err?.response?.data?.message || err?.message || "Failed to delete media.";
+      showErrorToast(msg);
+      console.error("Delete media error:", err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -121,6 +133,17 @@ const PortfolioManagementPage = () => {
 
   return (
     <>
+      {celebrate && (
+        <div className="fixed inset-0 z-[2500] pointer-events-none">
+          <FireworksBackground
+            className="size-full"
+            population={3}
+            color={["#ff4d4f", "#52c41a", "#1677ff", "#faad14"]}
+            fireworkSpeed={{ min: 4, max: 8 }}
+            particleSize={{ min: 2, max: 6 }}
+          />
+        </div>
+      )}
       <div className="min-h-screen bg-kalaa-cream">
         <div className="container mx-auto px-4 py-8 md:py-12">
           <header className="mb-8 md:mb-12">
@@ -221,25 +244,23 @@ const PortfolioManagementPage = () => {
                 {portfolio.map((media) => (
                   <div
                     key={media.id}
-                    className="relative rounded-2xl overflow-hidden shadow-md border group aspect-w-1 aspect-h-1 bg-gray-100"
+                    className="relative rounded-2xl overflow-hidden shadow-md border group aspect-w-1 aspect-h-1 bg-gray-100 cursor-zoom-in"
+                    onClick={() => setPreviewMedia(media)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPreviewMedia(media); } }}
                   >
                     <img
                       src={media.mediaUrl}
                       alt="Portfolio item"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all flex flex-col items-center justify-center space-y-2 opacity-0 group-hover:opacity-100 p-2">
+                    <div className="absolute inset-0 bg-black/50 md:bg-black/0 md:group-hover:bg-black/60 transition-all flex flex-col items-center justify-center space-y-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 p-2 pointer-events-auto md:pointer-events-none">
                       <button
-                        onClick={() => handleSetProfilePic(media.id)}
-                        className="flex items-center gap-2 text-white bg-black bg-opacity-50 hover:bg-opacity-80 px-3 py-1.5 text-xs rounded-full transition-colors"
+                        onClick={(e) => { e.stopPropagation(); handleSetProfilePic(media.id); }}
+                        className="flex items-center gap-2 text-white bg-black/50 hover:bg-black/80 px-3 py-1.5 text-xs rounded-full transition-colors pointer-events-auto"
                       >
                         <UserCircle2 className="w-4 h-4" /> Set as Profile Pic
-                      </button>
-                      <button
-                        onClick={() => setItemToDelete(media)}
-                        className="flex items-center gap-2 text-white bg-red-500 bg-opacity-80 hover:bg-opacity-100 px-3 py-1.5 text-xs rounded-full transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
                       </button>
                     </div>
                   </div>
@@ -252,9 +273,24 @@ const PortfolioManagementPage = () => {
         </div>
       </div>
 
+      {/* Preview Modal */}
+      {previewMedia && (
+        <div className="fixed inset-0 z-[3000] bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewMedia(null)}>
+          <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="absolute -top-10 right-0 text-white bg-white/10 hover:bg-white/20 rounded-full px-3 py-1 text-sm"
+              onClick={() => setPreviewMedia(null)}
+            >
+              Close
+            </button>
+            <img src={previewMedia.mediaUrl} alt="Preview" className="w-full h-auto rounded-lg shadow-2xl" />
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {itemToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto transform transition-all">
             <div className="p-6 text-center">
               <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -269,15 +305,17 @@ const PortfolioManagementPage = () => {
             <footer className="p-4 bg-gray-50 rounded-b-2xl flex justify-end items-center gap-4">
               <button
                 onClick={() => setItemToDelete(null)}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
+                disabled={deleting}
+                className="bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                disabled={deleting}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-colors"
               >
-                Delete
+                {deleting ? "Deleting..." : "Delete"}
               </button>
             </footer>
           </div>

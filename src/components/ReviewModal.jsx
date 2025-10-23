@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FireworksBackground } from "./ui/fireworks-background";
 import { X, Star, Send } from "lucide-react";
 
 // Assuming these exist in your project
@@ -10,6 +11,7 @@ const ReviewModal = ({ show, handleClose, booking, onReviewSubmit }) => {
   const [hoverRating, setHoverRating] = useState(0); // For hover effect
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,10 +28,15 @@ const ReviewModal = ({ show, handleClose, booking, onReviewSubmit }) => {
       });
       showSuccessToast("Thank you for your review!");
       onReviewSubmit(); // Refresh the calling component's data
-      // Reset state before closing
-      setRating(0);
-      setComment("");
-      handleClose();
+      // Celebrate briefly, then reset and close
+      setCelebrate(true);
+      setTimeout(() => {
+        setCelebrate(false);
+        setRating(0);
+        setComment("");
+        handleClose();
+      }, 1200);
+      return;
     } catch (err) {
       showErrorToast(
         err.response?.data?.message ||
@@ -48,10 +55,21 @@ const ReviewModal = ({ show, handleClose, booking, onReviewSubmit }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-kalaa-cream bg-opacity-90 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-kalaa-cream/90 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
     >
+      {celebrate && (
+        <div className="absolute inset-0 pointer-events-none">
+          <FireworksBackground
+            className="size-full"
+            population={2}
+            color={["#ff4d4f", "#52c41a", "#1677ff", "#faad14"]}
+            fireworkSpeed={{ min: 4, max: 8 }}
+            particleSize={{ min: 2, max: 6 }}
+          />
+        </div>
+      )}
       {/* Modal Panel */}
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-auto transform transition-all flex flex-col max-h-[90vh]">
         {/* Header */}

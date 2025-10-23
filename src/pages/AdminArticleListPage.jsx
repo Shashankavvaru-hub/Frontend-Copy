@@ -13,7 +13,7 @@ const DeleteConfirmationModal = ({ article, onConfirm, onCancel, loading }) => {
   if (!article) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto transform transition-all">
         <div className="p-6 text-center">
           <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />

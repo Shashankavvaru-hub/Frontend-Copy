@@ -135,7 +135,7 @@ const UserHomePageView = () => {
       {/* --- Hero Section --- */}
       <div className="text-center rounded-2xl bg-white shadow-lg p-8 md:p-12 mb-8 border border-gray-200">
         <h1 className="text-4xl md:text-5xl font-bold text-kalaa-charcoal font-playfair mb-4">
-          Discover the Soul of Telangana's Artistry
+          Discover the Soul of India's Artistry
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Connect with talented local artists. Find the perfect performance for
@@ -144,7 +144,7 @@ const UserHomePageView = () => {
       </div>
 
       {/* --- Search and View Toggle Section --- */}
-      <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-200 sticky top-20 z-20 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Search Bar */}
         <div className="relative flex flex-col md:flex-row items-center gap-4 w-full md:flex-1">
           <div className="relative w-full md:w-auto">

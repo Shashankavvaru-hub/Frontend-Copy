@@ -250,10 +250,13 @@ const PayNowButton = ({ booking, onPaymentSuccess }) => {
         order_id: order.id,
         handler: async (response) => {
           try {
-            await api.post("/payments/verify", {
-              ...response,
+            const verificationData = {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
               bookingId: booking.id,
-            });
+            };
+            await api.post("/payments/verify", verificationData);
             showSuccessToast("Payment successful!");
             onPaymentSuccess();
           } catch (verifyError) {
@@ -338,7 +341,7 @@ const UserDashboard = ({ bookings, onPaymentSuccess, onLeaveReview }) => {
                     {isReviewable && (
                       <button
                         onClick={() => onLeaveReview(booking)}
-                        className="bg-kalaa-amber hover:bg-opacity-80 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm flex items-center gap-2"
+                        className="bg-kalaa-amber hover:bg-kalaa-amber/80 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm flex items-center gap-2"
                       >
                         <Star className="w-4 h-4" /> Leave a Review
                       </button>
@@ -392,7 +395,7 @@ const UserDashboard = ({ bookings, onPaymentSuccess, onLeaveReview }) => {
 
 const BookingDetailModal = ({ booking, onClose, onUpdateBooking }) => {
   return (
-    <div className="fixed inset-0 bg-kalaa-cream bg-opacity-60 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-kalaa-cream/60 z-50 flex items-center justify-center p-4">
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-auto"
         role="dialog"

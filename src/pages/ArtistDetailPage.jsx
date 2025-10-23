@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, CalendarCheck, CheckCircle } from "lucide-react";
+import { MapPin, CalendarCheck, CheckCircle, Mail } from "lucide-react";
 
 // Assuming these components and context/api exist
 import api from "../api/axiosConfig";
@@ -62,50 +62,53 @@ const ArtistDetailPage = () => {
         <div className="container mx-auto px-4 py-8 md:py-12">
           {/* Hero Section */}
           <div className="relative mb-8 md:mb-12 rounded-2xl overflow-hidden bg-white shadow-lg border border-gray-200">
-            {/* Optional Cover Image */}
             {artist.coverImageUrl && (
-              <img
-                src={artist.coverImageUrl}
-                alt={`${artist.artistName} cover`}
-                className="w-full h-48 md:h-64 object-cover"
-              />
-            )}
-            <div
-              className={`p-6 md:p-8 ${artist.coverImageUrl ? "md:pt-4" : ""}`}
-            >
-              {" "}
-              {/* Adjust padding if cover exists */}
-              <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6 relative">
-                {/* Profile Picture */}
+              <>
                 <img
-                  src={
-                    artist.profilePictureUrl ||
-                    "https://i.imgur.com/8b2hUoE.jpeg"
-                  }
+                  src={artist.coverImageUrl}
+                  alt={`${artist.artistName} cover`}
+                  className="w-full h-48 md:h-64 object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              </>
+            )}
+            <div className={`p-6 md:p-8 ${artist.coverImageUrl ? "md:pt-4" : ""}`}>
+              <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6 relative">
+                {/* Profile */}
+                <img
+                  src={artist.profilePictureUrl || "https://i.imgur.com/8b2hUoE.jpeg"}
                   alt={artist.artistName}
-                  className={`w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-md flex-shrink-0 ${
-                    artist.coverImageUrl ? "-mt-12 md:-mt-16 z-10" : ""
-                  }`}
+                  className={`w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-md flex-shrink-0 ${artist.coverImageUrl ? "-mt-12 md:-mt-16 z-10" : ""}`}
                 />
                 <div className="flex-grow">
-                  <h1 className="font-playfair text-3xl md:text-5xl font-bold text-kalaa-charcoal mb-1">
-                    {artist.artistName}
+                  <h1 className="font-playfair text-3xl md:text-5xl font-bold text-kalaa-charcoal flex items-center gap-2">
+                    <span className={`${artist.coverImageUrl ? "text-white drop-shadow" : ""}`}>{artist.artistName}</span>
                     {artist.verified && (
-                      <CheckCircle
-                        className="w-5 h-5 md:w-6 md:h-6 inline-block text-kalaa-amber ml-2 mb-1"
-                        title="Verified Artist"
-                      />
+                      <CheckCircle className={`w-5 h-5 md:w-6 md:h-6 ${artist.coverImageUrl ? "text-white" : "text-kalaa-amber"}`} title="Verified Artist" />
                     )}
                   </h1>
-                  <p className="font-semibold text-kalaa-orange text-lg md:text-xl mb-2">
-                    {artist.artForm}
-                  </p>
-                  <div className="flex items-center text-gray-600 text-sm md:text-base">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {artist.location}
+                  <div className={`mt-2 flex flex-wrap items-center gap-3 ${artist.coverImageUrl ? "text-white" : "text-kalaa-charcoal"}`}>
+                    <span className="inline-flex items-center bg-white/90 text-kalaa-orange font-semibold px-3 py-1 rounded-full shadow-sm">
+                      {artist.artForm}
+                    </span>
+                    <span className="inline-flex items-center text-sm">
+                      <MapPin className="w-4 h-4 mr-1" /> {artist.location}
+                    </span>
+                  </div>
+                  {/* Stats */}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {(artist.reviewCount ?? 0) > 0 ? (
+                      <span className="inline-flex items-center bg-white text-gray-800 text-sm px-3 py-1 rounded-full shadow-sm">
+                        ⭐ {Number(artist.averageRating || 0).toFixed(1)} ({artist.reviewCount})
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center bg-white text-gray-800 text-sm px-3 py-1 rounded-full shadow-sm">
+                        No Reviews
+                      </span>
+                    )}
                   </div>
                 </div>
-                {/* Book Now Button (Desktop - Right aligned) */}
+                {/* Book Now (Desktop) */}
                 <div className="hidden md:block flex-shrink-0">
                   <button
                     onClick={handleBookNowClick}
@@ -118,33 +121,53 @@ const ArtistDetailPage = () => {
             </div>
           </div>
 
+          {/* Quick Info Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-8">
+            <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-200 text-center">
+              <p className="text-sm font-semibold text-kalaa-charcoal mb-1">Starting from</p>
+              <p className="text-2xl font-bold text-kalaa-orange">₹10,000</p>
+            </div>
+            <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-200 text-center">
+              <p className="text-sm font-semibold text-kalaa-charcoal mb-1">Usually responds within</p>
+              <p className="text-lg font-bold text-gray-800">2hrs</p>
+            </div>
+          </div>
+
+          {/* Contact Email */}
+          {(artist.email || (artist.user && artist.user.email)) && (
+            <div className="mb-8">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-200">
+                <h3 className="font-playfair text-xl md:text-2xl font-bold text-kalaa-charcoal mb-3">Contact</h3>
+                <a
+                  href={`mailto:${artist.email || (artist.user && artist.user.email)}`}
+                  className="inline-flex items-center gap-2 text-kalaa-orange hover:text-kalaa-red font-semibold break-all"
+                >
+                  <Mail className="w-5 h-5" /> {artist.email || (artist.user && artist.user.email)}
+                </a>
+                <p className="text-sm text-gray-600 mt-2">Use this email for enquiries and as a point of contact.</p>
+              </div>
+            </div>
+          )}
+
           {/* Main Content Area */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-            {/* Left Column (Bio, Portfolio, Reviews) */}
-            <div className="lg:col-span-2 space-y-8 md:space-y-12">
-              {/* About Section */}
+          <div className="grid grid-cols-1 gap-8 md:gap-12">
+            {/* Bio, Portfolio, Reviews */}
+            <div className="space-y-8 md:space-y-12">
+              {/* About */}
               <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-200">
-                <h2 className="font-playfair text-2xl md:text-3xl font-bold text-kalaa-charcoal mb-4">
-                  About the Artist
-                </h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {artist.bio || "No biography provided."}
-                </p>
+                <h2 className="font-playfair text-2xl md:text-3xl font-bold text-kalaa-charcoal mb-3">About the Artist</h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{artist.bio || "No biography provided."}</p>
               </section>
 
-              {/* Portfolio Section */}
-              <section>
-                <h2 className="font-playfair text-2xl md:text-3xl font-bold text-kalaa-charcoal mb-4">
-                  Portfolio
-                </h2>
+              {/* Portfolio */}
+              <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-200">
+                <h2 className="font-playfair text-2xl md:text-3xl font-bold text-kalaa-charcoal mb-3">Portfolio</h2>
                 <MediaGallery portfolio={artist.portfolio || []} />
               </section>
 
-              {/* Reviews Section */}
-              <section>
-                <h2 className="font-playfair text-2xl md:text-3xl font-bold text-kalaa-charcoal mb-4">
-                  Reviews
-                </h2>
+              {/* Reviews */}
+              <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-200">
+                <h2 className="font-playfair text-2xl md:text-3xl font-bold text-kalaa-charcoal mb-3">Reviews</h2>
                 <ReviewList
                   reviews={artist.reviews || []}
                   averageRating={artist.averageRating}
@@ -153,38 +176,7 @@ const ArtistDetailPage = () => {
               </section>
             </div>
 
-            {/* Right Column (Sticky Booking - Desktop) */}
-            <aside className="hidden lg:block relative">
-              <div className="sticky top-24 space-y-6">
-                {" "}
-                {/* Adjust top value based on your header height */}
-                {/* Simplified Booking Card */}
-                <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-center">
-                  <p className="text-lg font-semibold text-kalaa-charcoal mb-1">
-                    Starting from
-                  </p>
-                  <p className="text-3xl font-bold text-kalaa-orange mb-4">
-                    ₹{artist.startingPrice || "N/A"}
-                  </p>
-                  <button
-                    onClick={handleBookNowClick}
-                    className="w-full bg-kalaa-orange hover:bg-kalaa-red text-white font-bold py-3 px-6 rounded-full transition-colors shadow-md flex items-center justify-center gap-2"
-                  >
-                    <CalendarCheck className="w-5 h-5" /> Book Now
-                  </button>
-                  <p className="text-xs text-gray-500 mt-3">
-                    Check availability and get a quote
-                  </p>
-                </div>
-                {/* Add other info like response time, languages etc. if available */}
-                {artist.responseTime && (
-                  <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-200 text-sm text-gray-700">
-                    Usually responds within:{" "}
-                    <span className="font-semibold">{artist.responseTime}</span>
-                  </div>
-                )}
-              </div>
-            </aside>
+            {/* Removed sticky booking aside for cleaner layout */}
           </div>
 
           {/* Book Now Button (Mobile - Sticky Footer) */}

@@ -6,12 +6,15 @@
 /* Custom CSS below */
 
 /* --- 1. Global Typography and Color Theme --- */
+html, body, #root {
+  height: 100%;
+}
 body {
   /* Set the default font for all text */
   font-family: 'Lato', sans-serif;
-  /* A slightly off-white background is easier on the eyes */
-  background-color: #f8f9fa; 
-  
+  /* Full-bleed white background to avoid page edge borders */
+  background-color: #ffffff;
+  margin: 0; /* remove default browser margins */
   /* Set the default text color */
   color: #212529;
 }

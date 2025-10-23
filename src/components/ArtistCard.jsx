@@ -35,6 +35,11 @@ const ArtistCard = ({ artist }) => {
           <MapPin className="w-4 h-4 mr-2 text-gray-400" />
           <span className="text-sm font-medium">{artist.location}</span>
         </div>
+        {artist.shortBio && (
+          <p className="mt-2 text-sm text-gray-600 break-words whitespace-normal">
+            {artist.shortBio}
+          </p>
+        )}
       </div>
     </Link>
   );

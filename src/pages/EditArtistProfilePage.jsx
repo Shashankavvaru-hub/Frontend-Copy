@@ -14,6 +14,7 @@ const EditArtistProfilePage = () => {
     artForm: "",
     location: "",
     bio: "",
+    shortBio: "",
   });
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true); // Separate loading state for initial fetch
@@ -28,6 +29,7 @@ const EditArtistProfilePage = () => {
         artForm: user.artist.artForm || "",
         location: user.artist.location || "",
         bio: user.artist.bio || "",
+        shortBio: user.artist.shortBio || "",
       });
       setInitialLoading(false); // Data loaded
     } else if (user && !user.artist) {
@@ -155,6 +157,28 @@ const EditArtistProfilePage = () => {
                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-kalaa-orange focus:bg-white transition-all text-gray-800"
                   required
                   placeholder="e.g., Hyderabad, Telangana"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="shortBio"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Short Bio (one-liner)
+              </label>
+              <div className="relative">
+                <Feather className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  id="shortBio"
+                  name="shortBio"
+                  value={formData.shortBio}
+                  onChange={handleInputChange}
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-kalaa-orange focus:bg-white transition-all text-gray-800"
+                  placeholder="E.g., Folk singer with 8+ years experience"
+                  maxLength={160}
                 />
               </div>
             </div>

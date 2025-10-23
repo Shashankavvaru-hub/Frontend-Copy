@@ -48,7 +48,7 @@ function App() {
         theme="colored"
       />
       <Navbar />
-      <main className="container my-4">
+      <main className="flex-1">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
